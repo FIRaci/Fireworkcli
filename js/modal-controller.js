@@ -1,12 +1,12 @@
 /**
- * Alt + Q Modal Interactive Controller
- * Handles Waves Timeline, Presets, JSON, and Step-by-Step Guide / Glossary
+ * Alt + Q Modal Controller v3.0 (<160 lines)
  */
 
-import { configStore, PRESETS } from './config.js';
+import { configStore } from './config.js';
 import { ModalCardTemplate } from './modal-card-template.js';
-import { GUIDE_SECTIONS } from './guide-content.js';
-import { Icons } from './icons.js';
+import { StorageManager } from './storage-manager.js';
+import { ModalTabRenderer } from './modal-tab-renderer.js';
+import { ModalSyncHelper } from './modal-sync-helper.js';
 
 export class ModalController {
   constructor(modalElement, appController) {
@@ -16,9 +16,7 @@ export class ModalController {
 
     this.bindDomElements();
     this.bindEvents();
-    this.renderWaves();
-    this.renderPresets();
-    this.renderGuide();
+    this.renderAllTabs();
   }
 
   bindDomElements() {
@@ -27,13 +25,29 @@ export class ModalController {
     this.wavesContainer = this.modal.querySelector('#wavesContainer');
     this.presetsContainer = this.modal.querySelector('#presetsContainer');
     this.guideContainer = this.modal.querySelector('#guideContainer');
+    this.clickContainer = this.modal.querySelector('#clickContainer');
+    this.displayContainer = this.modal.querySelector('#displayContainer');
+
     this.closeBtn = this.modal.querySelector('#modalCloseBtn');
     this.addWaveBtn = this.modal.querySelector('#addWaveBtn');
     this.applyBtn = this.modal.querySelector('#applyConfigBtn');
     this.testFireBtn = this.modal.querySelector('#testFireBtn');
     this.exportBtn = this.modal.querySelector('#exportJsonBtn');
     this.importBtn = this.modal.querySelector('#importJsonBtn');
+    this.resetBtn = this.modal.querySelector('#resetStorageBtn');
     this.jsonInput = this.modal.querySelector('#jsonConfigInput');
+  }
+
+  renderAllTabs() {
+    this.renderWaves();
+    ModalTabRenderer.renderPresets(this.presetsContainer, this.app, (preset) => {
+      this.renderWaves();
+      this.app.setTheme(preset.theme || 'monochrome');
+      this.app.terminal.log(`Đã nạp preset: ${preset.name}`, 'info');
+    });
+    ModalTabRenderer.renderGuide(this.guideContainer);
+    ModalTabRenderer.renderClickSettings(this.clickContainer);
+    ModalTabRenderer.renderDisplaySettings(this.displayContainer, this.app);
   }
 
   bindEvents() {
@@ -52,19 +66,20 @@ export class ModalController {
     });
 
     this.testFireBtn.addEventListener('click', () => {
-      this.syncFromInputs();
+      ModalSyncHelper.syncAll(this.modal, this.app);
       this.app.startShow();
     });
 
     this.applyBtn.addEventListener('click', () => {
-      this.syncFromInputs();
+      ModalSyncHelper.syncAll(this.modal, this.app);
+      configStore.save();
       this.toggle(false);
-      this.app.terminal.log('Đã cập nhật cấu hình pháo hoa thành công.', 'info');
+      this.app.terminal.log('Đã lưu cấu hình (LocalStorage).', 'info');
     });
 
     if (this.exportBtn) {
       this.exportBtn.addEventListener('click', () => {
-        this.syncFromInputs();
+        ModalSyncHelper.syncAll(this.modal, this.app);
         if (this.jsonInput) this.jsonInput.value = configStore.exportJSON();
       });
     }
@@ -74,9 +89,20 @@ export class ModalController {
         if (this.jsonInput && this.jsonInput.value) {
           if (configStore.importJSON(this.jsonInput.value)) {
             this.renderWaves();
-            this.app.terminal.log('Đã nạp cấu hình JSON thành công.', 'info');
+            ModalTabRenderer.renderClickSettings(this.clickContainer);
+            this.app.terminal.log('Đã nạp JSON thành công.', 'info');
           }
         }
+      });
+    }
+
+    if (this.resetBtn) {
+      this.resetBtn.addEventListener('click', () => {
+        StorageManager.clearStorage();
+        configStore.loadPreset('romantic_salvo');
+        this.renderWaves();
+        ModalTabRenderer.renderClickSettings(this.clickContainer);
+        this.app.terminal.log('Đã khôi phục cài đặt gốc.', 'info');
       });
     }
   }
@@ -91,6 +117,7 @@ export class ModalController {
     if (this.isOpen) {
       this.modal.classList.add('open');
       this.renderWaves();
+      ModalTabRenderer.renderClickSettings(this.clickContainer);
       if (this.jsonInput) this.jsonInput.value = configStore.exportJSON();
       if (initialTab) this.switchTab(initialTab);
     } else {
@@ -110,10 +137,10 @@ export class ModalController {
       this.wavesContainer.appendChild(card);
     });
 
-    this.bindWaveInputs();
+    this.bindWaveActions();
   }
 
-  bindWaveInputs() {
+  bindWaveActions() {
     this.wavesContainer.querySelectorAll('.delete-wave-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const idx = parseInt(btn.dataset.idx, 10);
@@ -125,7 +152,7 @@ export class ModalController {
     this.wavesContainer.querySelectorAll('.test-wave-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const idx = parseInt(btn.dataset.idx, 10);
-        this.syncFromInputs();
+        ModalSyncHelper.syncAll(this.modal, this.app);
         const wave = configStore.activeShow.waves[idx];
         if (wave) this.app.engine.scheduler.executeWave(wave);
       });
@@ -135,91 +162,10 @@ export class ModalController {
       input.addEventListener('input', () => {
         const labelBadge = input.closest('.form-group').querySelector('.value-badge');
         if (labelBadge) {
-          const suffix = input.className.includes('delay') || input.className.includes('hang') || input.className.includes('stagger') ? 's' : '';
+          const suffix = input.className.includes('delay') || input.className.includes('hang') || input.className.includes('stagger') ? 's' : (input.className.includes('spread') ? 'x' : '');
           labelBadge.textContent = `${input.value}${suffix}`;
         }
       });
     });
-  }
-
-  syncFromInputs() {
-    const cards = this.wavesContainer.querySelectorAll('.wave-card');
-    cards.forEach((card, idx) => {
-      const wave = configStore.activeShow.waves[idx];
-      ModalCardTemplate.readCardValues(card, wave);
-    });
-  }
-
-  renderPresets() {
-    if (!this.presetsContainer) return;
-    this.presetsContainer.innerHTML = '';
-
-    Object.entries(PRESETS).forEach(([key, preset]) => {
-      const card = document.createElement('div');
-      card.className = 'preset-card';
-      card.innerHTML = `
-        <div class="preset-title">${preset.name}</div>
-        <div class="preset-desc">${preset.desc}</div>
-      `;
-
-      card.addEventListener('click', () => {
-        configStore.loadPreset(key);
-        this.renderWaves();
-        this.app.setTheme(preset.theme || 'monochrome');
-        this.app.terminal.log(`Đã nạp preset: ${preset.name}`, 'info');
-      });
-
-      this.presetsContainer.appendChild(card);
-    });
-  }
-
-  renderGuide() {
-    if (!this.guideContainer) return;
-    
-    let html = `
-      <div class="guide-block">
-        <h4 class="guide-heading">${Icons.info} <span>Giải thích thuật ngữ cốt lõi</span></h4>
-        <div class="glossary-grid">
-    `;
-
-    GUIDE_SECTIONS.glossary.forEach(item => {
-      html += `
-        <div class="glossary-card">
-          <div class="glossary-header">
-            <span class="glossary-term">${item.term}</span>
-            <span class="glossary-badge">${item.badge}</span>
-          </div>
-          <p class="glossary-desc">${item.desc.replace(/\n/g, '<br>')}</p>
-        </div>
-      `;
-    });
-
-    html += `
-        </div>
-      </div>
-
-      <div class="guide-block" style="margin-top: 18px;">
-        <h4 class="guide-heading">${Icons.book} <span>Hướng dẫn chi tiết từng bước</span></h4>
-        <div class="steps-timeline">
-    `;
-
-    GUIDE_SECTIONS.steps.forEach(item => {
-      html += `
-        <div class="step-item">
-          <div class="step-num">${item.step}</div>
-          <div class="step-content">
-            <div class="step-title">${item.title}</div>
-            <div class="step-desc">${item.desc}</div>
-          </div>
-        </div>
-      `;
-    });
-
-    html += `
-        </div>
-      </div>
-    `;
-
-    this.guideContainer.innerHTML = html;
   }
 }

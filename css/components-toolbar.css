@@ -1,0 +1,198 @@
+/* ==========================================================================
+   HEADER & ACTION TOOLBAR COMPONENTS (<140 lines)
+   ========================================================================== */
+
+.terminal-header {
+  position: relative;
+  z-index: 40;
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.window-controls {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.win-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transition: opacity 0.2s ease;
+}
+
+.win-dot:hover { opacity: 0.8; }
+.win-close { background: #ff5f56; opacity: 0.8; }
+.win-min { background: #ffbd2e; opacity: 0.8; }
+.win-max { background: #27c93f; opacity: 0.8; }
+
+.terminal-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: 0.3px;
+}
+
+.terminal-title .path-badge {
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-dim);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stat-item {
+  font-size: 11px;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.stat-item .val {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.action-toolbar {
+  position: absolute;
+  top: calc(var(--header-height) + 12px);
+  right: 16px;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-surface);
+  padding: 4px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.btn {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid transparent;
+  padding: 6px 12px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1;
+}
+
+.btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  border-color: var(--border-subtle);
+}
+
+.btn:active { transform: translateY(1px); }
+
+.btn-primary {
+  background: #f4f4f5;
+  color: #0c0d11;
+  font-weight: 600;
+  border-color: #ffffff;
+}
+
+.btn-primary:hover {
+  background: #ffffff;
+  color: #000;
+  box-shadow: 0 2px 8px rgba(255, 255, 255, 0.15);
+}
+
+.btn-ghost {
+  color: var(--text-secondary);
+  border-color: var(--border-subtle);
+}
+
+.btn-ghost:hover {
+  color: var(--text-primary);
+  border-color: var(--border-medium);
+}
+
+.btn-danger { color: var(--danger); }
+.btn-danger:hover {
+  background: var(--danger-bg);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.btn kbd {
+  font-size: 9.5px;
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-dim);
+}
+
+.theme-select {
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 5px 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  outline: none;
+  cursor: pointer;
+}
+
+.theme-select:hover, .theme-select:focus {
+  border-color: var(--border-medium);
+  color: var(--text-primary);
+}
+
+.minimal-tip {
+  position: absolute;
+  top: calc(var(--header-height) + 16px);
+  left: 20px;
+  z-index: 30;
+  background: var(--bg-surface);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+  font-size: 11px;
+  color: var(--text-dim);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.minimal-tip kbd {
+  background: rgba(255, 255, 255, 0.07);
+  padding: 1px 5px;
+  border-radius: 3px;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+}

@@ -1,7 +1,9 @@
 /**
  * Wave Sequence Scheduler ("Đợt Nổ" Sequencer)
- * Manages timeline of multiple waves, inter-wave delays, rocket staggering, and loop state
+ * Supports multi-rocket salvos, phrase word splitting, and custom X-Y distribution
  */
+
+import { ShapeRasterizer } from './text-rasterizer.js';
 
 export class WaveScheduler {
   constructor(engine) {
@@ -29,7 +31,6 @@ export class WaveScheduler {
 
     if (waveIndex >= this.showConfig.waves.length) {
       if (this.showConfig.loop) {
-        // Loop show after 2.5s breather
         const loopTimer = setTimeout(() => {
           this.scheduleNextWave(0);
         }, 2500);
@@ -53,8 +54,6 @@ export class WaveScheduler {
       }
 
       this.executeWave(wave);
-
-      // Schedule subsequent wave
       this.scheduleNextWave(waveIndex + 1);
     }, delay);
 
@@ -62,45 +61,72 @@ export class WaveScheduler {
   }
 
   executeWave(wave) {
-    const count = wave.rocketCount || 1;
-    const stagger = (wave.stagger || 0.2) * 1000;
     const canvasWidth = window.innerWidth;
     const canvasHeight = window.innerHeight;
+    const stagger = (wave.stagger || 0.2) * 1000;
+
+    // Word Splitting Mode
+    if (wave.shape === 'text' && wave.splitWords && wave.customText) {
+      const splitRockets = ShapeRasterizer.splitPhraseToRockets(wave.customText, wave.altitude || 0.75);
+      splitRockets.forEach((r, i) => {
+        const timer = setTimeout(() => {
+          if (!this.isRunning) return;
+          const targetX = canvasWidth * r.xFraction;
+          const targetY = canvasHeight * (1 - r.altitude);
+
+          this.engine.launchRocket({
+            ...wave,
+            startX: targetX,
+            startY: canvasHeight,
+            targetX: targetX,
+            targetY: targetY,
+            customText: r.word
+          });
+        }, i * stagger);
+        this.activeTimeouts.push(timer);
+      });
+      return;
+    }
+
+    // Standard Multi-Rocket Distribution
+    const count = wave.rocketCount || 1;
+    const customXList = this.parseCustomX(wave.customXPositions, count);
 
     for (let i = 0; i < count; i++) {
       const rocketTimer = setTimeout(() => {
         if (!this.isRunning) return;
 
-        // Position rockets evenly or with slight organic distribution
-        let targetX;
-        if (count === 1) {
-          targetX = canvasWidth * 0.5 + (Math.random() - 0.5) * 100;
+        let xFraction;
+        if (customXList && customXList[i] !== undefined) {
+          xFraction = customXList[i];
+        } else if (count === 1) {
+          xFraction = 0.5 + (Math.random() - 0.5) * 0.1;
         } else {
-          const step = (canvasWidth * 0.7) / Math.max(1, count - 1);
-          targetX = (canvasWidth * 0.15) + (i * step) + (Math.random() - 0.5) * 60;
+          xFraction = 0.15 + (i * (0.7 / Math.max(1, count - 1)));
         }
 
-        const targetY = canvasHeight * (1 - (wave.altitude || 0.75)) + (Math.random() - 0.5) * 50;
-        const startX = targetX + (Math.random() - 0.5) * 80;
+        const targetX = canvasWidth * xFraction + (Math.random() - 0.5) * 30;
+        const targetY = canvasHeight * (1 - (wave.altitude || 0.75)) + (Math.random() - 0.5) * 40;
+        const startX = targetX + (Math.random() - 0.5) * 60;
 
         this.engine.launchRocket({
+          ...wave,
           startX: startX,
           startY: canvasHeight,
           targetX: targetX,
-          targetY: targetY,
-          stages: wave.stages || 1,
-          stage2Delay: wave.stage2Delay || 0.8,
-          shape: wave.shape || 'sphere',
-          customText: wave.customText || '',
-          colorPalette: wave.colorPalette || 'rainbow',
-          spread: wave.spread || 1.2,
-          hangTime: wave.hangTime || 2.0,
-          characters: wave.characters
+          targetY: targetY
         });
       }, i * stagger);
 
       this.activeTimeouts.push(rocketTimer);
     }
+  }
+
+  parseCustomX(str, count) {
+    if (!str || typeof str !== 'string') return null;
+    const parts = str.split(/[,;\s]+/).map(p => parseFloat(p)).filter(n => !isNaN(n));
+    if (parts.length === 0) return null;
+    return parts.map(val => val > 1 ? val / 100 : val);
   }
 
   stopShow() {

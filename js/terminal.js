@@ -1,5 +1,5 @@
 /**
- * Interactive Terminal CLI Engine
+ * Interactive Terminal CLI Engine v3.0
  * Command line parser, command history, autocompletion, and system logger
  */
 
@@ -11,7 +11,11 @@ export class TerminalCLI {
     
     this.history = [];
     this.historyIndex = -1;
-    this.commands = ['start', 'stop', 'config', 'guide', 'text', 'heart', 'star', 'preset', 'theme', 'sound', 'clear', 'help'];
+    this.commands = [
+      'start', 'stop', 'config', 'guide', 'text', 'heart', 'star', 'star8', 
+      'saturn', 'butterfly', 'infinity', 'clover', 'crown', 'diamond', 'smiley', 
+      'chrysanthemum', 'spiral', 'willow', 'double_ring', 'preset', 'theme', 'sound', 'clear', 'help'
+    ];
 
     this.bindEvents();
     this.printWelcome();
@@ -100,29 +104,37 @@ export class TerminalCLI {
       case 'config':
       case 'settings':
         this.app.toggleModal(true);
-        this.log('Mở bảng cấu hình tùy biến (Alt + Q)...', 'info');
+        this.log('Mở bảng cấu hình tùy biến chuyên sâu (Alt + Q)...', 'info');
         break;
 
       case 'guide':
       case 'glossary':
         this.app.openGuide();
-        this.log('Mở tài liệu Hướng dẫn & Giải thích thuật ngữ...', 'info');
+        this.log('Mở tài liệu Hướng dẫn & 16+ Kiểu hình...', 'info');
         break;
 
       case 'text':
-        const msg = args.join(' ') || 'I love you ♡';
+        const msg = args.join(' ') || 'I LOVE YOU ♡';
         this.app.fireText(msg);
         this.log(`Bắn cụm chữ: "${msg}"`, 'info');
         break;
 
       case 'heart':
-        this.app.fireShape('heart');
-        this.log('Bắn pháo hoa hình trái tim ♡', 'info');
-        break;
-
       case 'star':
-        this.app.fireShape('star');
-        this.log('Bắn pháo hoa hình ngôi sao ★', 'info');
+      case 'star8':
+      case 'saturn':
+      case 'butterfly':
+      case 'infinity':
+      case 'clover':
+      case 'crown':
+      case 'diamond':
+      case 'smiley':
+      case 'chrysanthemum':
+      case 'spiral':
+      case 'willow':
+      case 'double_ring':
+        this.app.fireShape(cmd);
+        this.log(`Bắn pháo hoa hình [${cmd}]`, 'info');
         break;
 
       case 'preset':
@@ -130,7 +142,7 @@ export class TerminalCLI {
         if (this.app.loadPreset(presetKey)) {
           this.log(`Đã nạp preset [${presetKey}]`, 'info');
         } else {
-          this.log('Preset khả dụng: romantic, monochrome_minimal, champagne_finale', 'error');
+          this.log('Preset: romantic_salvo, cosmic_spectrum', 'error');
         }
         break;
 
@@ -140,7 +152,7 @@ export class TerminalCLI {
           this.app.setTheme(themeName);
           this.log(`Đã chuyển theme sang [${themeName}]`, 'info');
         } else {
-          this.log('Theme hợp lệ: monochrome, slate, warm', 'warn');
+          this.log('Theme: monochrome, slate, warm', 'warn');
         }
         break;
 
@@ -168,11 +180,11 @@ export class TerminalCLI {
   }
 
   printWelcome() {
-    this.log('Terminal ASCII Fireworks initialized. Press [Alt + Q] for configuration.', 'info');
-    this.log('Type "start" to run show, "guide" for tutorial/glossary, or "text I love you ♡".', 'info');
+    this.log('Terminal ASCII Fireworks v3.0. Press [Alt + Q] for Ultra Customizer.', 'info');
+    this.log('Commands: start, text <msg>, saturn, butterfly, heart, star, clover, guide, help.', 'info');
   }
 
   printHelp() {
-    this.log('Commands: start, stop, config (Alt+Q), guide, text <msg>, heart, star, preset <name>, theme <name>, clear, help', 'info');
+    this.log('Commands: start, stop, config, guide, text <msg>, heart, star, saturn, butterfly, infinity, clover, crown, preset <name>, theme, sound, clear, help', 'info');
   }
 }

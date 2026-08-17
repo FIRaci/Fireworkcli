@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Terminal ASCII Fireworks</title>
-  <meta name="description" content="Minimalist Terminal ASCII Fireworks Simulation with Alt+Q Customizer">
+  <title>Terminal ASCII Fireworks v3.0</title>
+  <meta name="description" content="Ultra Customizer Terminal ASCII Fireworks Simulation with 16+ shapes, 5 stages, and X-Y HUD">
   
   <!-- Content Security Policy -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' data: https://fonts.googleapis.com https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; connect-src 'self';">
@@ -22,7 +22,6 @@
 <body>
 
   <div class="terminal-wrap">
-    <!-- Subtle Visual Enhancements -->
     <div class="screen-vignette"></div>
     <div class="subtle-scanline"></div>
 
@@ -39,7 +38,7 @@
         </div>
         <div class="terminal-title">
           <span>ascii-fireworks</span>
-          <span class="path-badge">~/show</span>
+          <span class="path-badge">v3.0-ultra</span>
         </div>
       </div>
 
@@ -58,7 +57,7 @@
 
     <!-- Top Action Toolbar -->
     <div class="action-toolbar">
-      <button class="btn btn-primary" id="startShowBtn" title="Bắn pháo hoa">
+      <button class="btn btn-primary" id="startShowBtn" title="Bắn pháo hoa theo kịch bản">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
         <span>Start Show</span>
       </button>
@@ -108,7 +107,7 @@
           type="text" 
           id="cliInput" 
           class="cli-input" 
-          placeholder="Nhập lệnh (vd: start, config, guide, text I love you ♡, heart, preset champagne_finale, help)..." 
+          placeholder="Nhập lệnh (vd: start, config, guide, text I LOVE YOU ♡, heart, saturn, butterfly, help)..." 
           autocomplete="off" 
           spellcheck="false"
         >
@@ -116,14 +115,14 @@
     </div>
   </div>
 
-  <!-- ALT + Q CUSTOMIZATION MODAL -->
+  <!-- ALT + Q CUSTOMIZATION MODAL (5 TABS) -->
   <div class="modal-backdrop" id="configModal">
     <div class="modal-dialog">
       <!-- Modal Header -->
       <div class="modal-header">
         <div class="modal-title">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
-          <span>Fireworks Configuration</span>
+          <span>Ultra Fireworks Customizer v3.0</span>
         </div>
         <button class="modal-close-btn" id="modalCloseBtn" aria-label="Close modal">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -134,33 +133,41 @@
       <div class="modal-tabs">
         <button class="tab-btn active" data-tab="waves">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
-          <span>Waves & Stages</span>
+          <span>Waves & Stages (5 Lượt)</span>
+        </button>
+        <button class="tab-btn" data-tab="click">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+          <span>Click-to-Fire</span>
+        </button>
+        <button class="tab-btn" data-tab="display">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+          <span>Display & HUD</span>
         </button>
         <button class="tab-btn" data-tab="presets">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"></path></svg>
-          <span>Presets</span>
+          <span>Presets & Storage</span>
         </button>
         <button class="tab-btn" data-tab="guide">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-          <span>Guide & Glossary</span>
+          <span>Guide & 16+ Shapes</span>
         </button>
         <button class="tab-btn" data-tab="json">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-          <span>JSON Config</span>
+          <span>JSON</span>
         </button>
       </div>
 
       <!-- Modal Body -->
       <div class="modal-body">
-        <!-- TAB 1: Waves & Stages Sequencer -->
+        <!-- TAB 1: Waves & Stages -->
         <div class="tab-pane active" id="tab-waves">
           <div style="display: flex; justify-content: space-between; align-items: center;">
             <p style="font-size: 11.5px; color: var(--text-dim);">
-              Đợt (Wave) = trình tự bắn; Lượt (Stages) = số lần nổ thứ cấp của từng quả pháo.
+              Đợt (Wave) = trình tự bắn; Lượt (Stages) = số lần nổ thứ cấp liên tiếp (tối đa 5 lượt).
             </p>
             <button class="btn btn-primary" id="addWaveBtn">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-              <span>Add Wave</span>
+              <span>+ Add Wave</span>
             </button>
           </div>
 
@@ -169,24 +176,47 @@
           </div>
         </div>
 
-        <!-- TAB 2: Presets -->
-        <div class="tab-pane" id="tab-presets">
+        <!-- TAB 2: Click-to-Fire Settings -->
+        <div class="tab-pane" id="tab-click">
           <p style="font-size: 11.5px; color: var(--text-dim);">
-            Chọn nhanh một kịch bản pháo hoa tối giản, nhẹ nhàng:
+            Tùy biến loại pháo hoa, hình dạng, số lượt nổ và màu sắc phát ra khi bạn click chuột lên màn hình:
           </p>
+          <div id="clickContainer">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+
+        <!-- TAB 3: Display & HUD Grid -->
+        <div class="tab-pane" id="tab-display">
+          <p style="font-size: 11.5px; color: var(--text-dim);">
+            Cấu hình độ phân giải, tỉ lệ phóng to màn hình và thước đo tọa độ trục X-Y:
+          </p>
+          <div id="displayContainer">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+
+        <!-- TAB 4: Presets & LocalStorage -->
+        <div class="tab-pane" id="tab-presets">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <p style="font-size: 11.5px; color: var(--text-dim);">
+              Chọn kịch bản mẫu hoặc lưu/khôi phục từ LocalStorage trình duyệt:
+            </p>
+            <button class="btn btn-danger" id="resetStorageBtn">Reset Factory</button>
+          </div>
           <div class="presets-grid" id="presetsContainer">
             <!-- Dynamic preset cards rendered via JS -->
           </div>
         </div>
 
-        <!-- TAB 3: Guide & Glossary -->
+        <!-- TAB 5: Guide & Glossary -->
         <div class="tab-pane" id="tab-guide">
           <div id="guideContainer">
             <!-- Rendered via JS -->
           </div>
         </div>
 
-        <!-- TAB 4: JSON Import/Export -->
+        <!-- TAB 6: JSON Import/Export -->
         <div class="tab-pane" id="tab-json">
           <div class="form-group">
             <label class="form-label">Configuration JSON</label>
@@ -216,7 +246,7 @@
         <div class="footer-right">
           <button class="btn btn-primary" id="applyConfigBtn">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            <span>Save & Apply</span>
+            <span>Save & Apply (Auto-save)</span>
           </button>
         </div>
       </div>

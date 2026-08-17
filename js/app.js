@@ -1,14 +1,15 @@
 /**
- * Main Application Orchestrator
- * Integrates Canvas Engine, CLI Terminal, Alt+Q Modal, Sound FX, and Global Keyboard Bindings
+ * Main Application Orchestrator v3.0
+ * Integrates Engine, CLI Terminal, 5-Tab Modal, Audio, and UI Bindings
  */
 
 import { FireworksEngine } from './engine.js';
 import { TerminalCLI } from './terminal.js';
 import { ModalController } from './modal-controller.js';
 import { soundFx } from './audio.js';
-import { configStore, COLOR_PALETTES } from './config.js';
+import { configStore } from './config.js';
 import { AppUiBindings } from './app-ui-bindings.js';
+import { ShapeRasterizer } from './text-rasterizer.js';
 
 class AppController {
   constructor() {
@@ -30,7 +31,7 @@ class AppController {
   startShow() {
     soundFx.ensureContext();
     this.engine.startShow(configStore.activeShow);
-    this.terminal.log(`▶ Bắt đầu kịch bản: ${configStore.activeShow.name} (${configStore.activeShow.waves.length} đợt)`, 'log-text');
+    this.terminal.log(`▶ Bắt đầu kịch bản: ${configStore.activeShow.name} (${configStore.activeShow.waves.length} đợt)`, 'info');
   }
 
   stopShow() {
@@ -47,19 +48,41 @@ class AppController {
 
   fireText(text) {
     soundFx.ensureContext();
-    this.engine.launchRocket({
-      startX: window.innerWidth / 2,
-      startY: window.innerHeight,
-      targetX: window.innerWidth / 2,
-      targetY: window.innerHeight * 0.3,
-      shape: 'text',
-      customText: text,
-      colorPalette: 'soft_rose',
-      spread: 1.3,
-      hangTime: 3.5,
-      stages: 2,
-      stage2Delay: 1.2
-    });
+    const words = text.trim().split(/\s+/);
+    if (words.length > 1) {
+      const splitRockets = ShapeRasterizer.splitPhraseToRockets(text);
+      splitRockets.forEach((r, i) => {
+        setTimeout(() => {
+          this.engine.launchRocket({
+            startX: window.innerWidth * r.xFraction,
+            startY: window.innerHeight,
+            targetX: window.innerWidth * r.xFraction,
+            targetY: window.innerHeight * (1 - r.altitude),
+            shape: 'text',
+            customText: r.word,
+            colorPalette: 'soft_rose',
+            spread: 1.3,
+            hangTime: 3.5,
+            stages: 2,
+            stageDelays: [0, 0.9]
+          });
+        }, i * 200);
+      });
+    } else {
+      this.engine.launchRocket({
+        startX: window.innerWidth / 2,
+        startY: window.innerHeight,
+        targetX: window.innerWidth / 2,
+        targetY: window.innerHeight * 0.3,
+        shape: 'text',
+        customText: text,
+        colorPalette: 'soft_rose',
+        spread: 1.3,
+        hangTime: 3.5,
+        stages: 2,
+        stageDelays: [0, 0.9]
+      });
+    }
   }
 
   fireShape(shape) {
@@ -70,30 +93,11 @@ class AppController {
       targetX: window.innerWidth * (0.3 + Math.random() * 0.4),
       targetY: window.innerHeight * 0.28,
       shape: shape,
-      colorPalette: shape === 'heart' ? 'soft_rose' : 'monochrome',
+      colorPalette: shape === 'heart' ? 'soft_rose' : 'champagne',
       spread: 1.3,
-      hangTime: 2.5,
-      stages: 2,
-      stage2Delay: 0.8
-    });
-  }
-
-  fireRandomRocket() {
-    soundFx.ensureContext();
-    const shapes = ['sphere', 'star', 'heart', 'willow', 'spiral'];
-    const palettes = Object.keys(COLOR_PALETTES);
-    
-    this.engine.launchRocket({
-      startX: window.innerWidth * (0.2 + Math.random() * 0.6),
-      startY: window.innerHeight,
-      targetX: window.innerWidth * (0.2 + Math.random() * 0.6),
-      targetY: window.innerHeight * (0.2 + Math.random() * 0.35),
-      shape: shapes[Math.floor(Math.random() * shapes.length)],
-      colorPalette: palettes[Math.floor(Math.random() * palettes.length)],
-      spread: 1.2,
-      hangTime: 2.2,
-      stages: Math.random() > 0.5 ? 2 : 1,
-      stage2Delay: 0.75
+      hangTime: 2.8,
+      stages: 3,
+      stageDelays: [0, 0.75, 1.4]
     });
   }
 
@@ -128,7 +132,7 @@ class AppController {
     };
 
     this.engine.scheduler.onShowComplete = () => {
-      this.terminal.log('Hoàn thành kịch bản pháo hoa.', 'log-text');
+      this.terminal.log('Hoàn thành kịch bản pháo hoa.', 'info');
     };
   }
 
@@ -146,7 +150,6 @@ class AppController {
   }
 }
 
-// Initialize on DOM load
 window.addEventListener('DOMContentLoaded', () => {
   window.app = new AppController();
 });

@@ -1,18 +1,18 @@
 /**
- * Firework Rocket & Multi-Stage Detonation Controller
- * Clean, subtle ASCII ascent trails, primary burst, and secondary multi-stage explosions
+ * Firework Rocket & Up to 5-Stage Detonation Controller
+ * Supports multi-stage sequence, per-stage color mapping, and 16+ mathematical shapes
  */
 
 import { AsciiParticle } from './particle.js';
 import { ShapeRasterizer } from './text-rasterizer.js';
 import { soundFx } from './audio.js';
-import { COLOR_PALETTES } from './config.js';
+import { ColorPaletteEngine } from './color-palette-engine.js';
 
 export class FireworkRocket {
   constructor(options = {}) {
     this.startX = options.startX || window.innerWidth / 2;
     this.startY = options.startY || window.innerHeight;
-    this.targetX = options.targetX || this.startX + (Math.random() - 0.5) * 180;
+    this.targetX = options.targetX || this.startX;
     this.targetY = options.targetY || window.innerHeight * 0.28;
 
     this.x = this.startX;
@@ -20,18 +20,20 @@ export class FireworkRocket {
     
     const dx = this.targetX - this.startX;
     const dy = this.targetY - this.startY;
-    const distance = Math.hypot(dx, dy);
+    const distance = Math.hypot(dx, dy) || 1;
     this.speed = options.speed || 11.5;
     this.vx = (dx / distance) * this.speed;
     this.vy = (dy / distance) * this.speed;
 
-    this.stages = options.stages || 1;
-    this.stage2Delay = options.stage2Delay || 0.8;
-    this.stage3Delay = options.stage3Delay || 1.4;
+    // Up to 5 stages configuration
+    this.stages = Math.min(5, Math.max(1, options.stages || 1));
+    this.stageDelays = options.stageDelays || [0, 0.75, 1.35, 1.95, 2.55];
+    this.stageColors = options.stageColors || [];
+    this.colorPalette = options.colorPalette || 'monochrome';
+    this.waveConfig = options;
+
     this.shape = options.shape || 'sphere';
     this.customText = options.customText || '';
-    this.paletteName = options.colorPalette || 'monochrome';
-    this.palette = COLOR_PALETTES[this.paletteName] || COLOR_PALETTES.monochrome;
     this.spread = options.spread || 1.2;
     this.hangTime = options.hangTime || 2.2;
     
@@ -52,7 +54,6 @@ export class FireworkRocket {
       this.x += this.vx;
       this.y += this.vy;
 
-      // Subtle ascent trail
       if (Math.random() < 0.6) {
         const trailChars = ['|', '!', ':', '.', 'o', '0'];
         this.trailParticles.push(new AsciiParticle({
@@ -75,16 +76,12 @@ export class FireworkRocket {
 
     for (let i = this.trailParticles.length - 1; i >= 0; i--) {
       this.trailParticles[i].update(dt);
-      if (this.trailParticles[i].isDead) {
-        this.trailParticles.splice(i, 1);
-      }
+      if (this.trailParticles[i].isDead) this.trailParticles.splice(i, 1);
     }
 
     for (let i = this.particles.length - 1; i >= 0; i--) {
       this.particles[i].update(dt);
-      if (this.particles[i].isDead) {
-        this.particles.splice(i, 1);
-      }
+      if (this.particles[i].isDead) this.particles.splice(i, 1);
     }
 
     if (this.isExploded && this.particles.length === 0 && this.trailParticles.length === 0) {
@@ -102,6 +99,7 @@ export class FireworkRocket {
       soundFx.playExplosion(1.0);
     }
 
+    // Stage 1 Burst
     const vectors = ShapeRasterizer.getShapeVectors(
       this.shape,
       this.customText,
@@ -109,10 +107,10 @@ export class FireworkRocket {
       4.2 * this.spread
     );
 
-    const primaryParticles = [];
+    const stage1Particles = [];
 
     vectors.forEach((v) => {
-      const color = this.palette[Math.floor(Math.random() * this.palette.length)];
+      const color = ColorPaletteEngine.resolveStageColor(0, this.waveConfig);
       const char = v.char || this.charPool[Math.floor(Math.random() * this.charPool.length)] || '*';
 
       const p = new AsciiParticle({
@@ -129,33 +127,33 @@ export class FireworkRocket {
       });
 
       this.particles.push(p);
-      primaryParticles.push(p);
+      stage1Particles.push(p);
     });
 
-    if (this.stages >= 2) {
+    // Schedule Multi-Stages (Stage 2..5)
+    for (let s = 2; s <= this.stages; s++) {
+      const delay = (this.stageDelays[s - 1] || ((s - 1) * 0.7)) * 1000;
       setTimeout(() => {
-        this.triggerSecondaryBurst(primaryParticles);
-      }, this.stage2Delay * 1000);
+        this.triggerStageBurst(s - 1, stage1Particles);
+      }, delay);
     }
   }
 
-  triggerSecondaryBurst(sourceParticles) {
+  triggerStageBurst(stageIdx, sourceParticles) {
     if (this.isDead) return;
 
-    soundFx.playExplosion(0.75, true);
+    soundFx.playExplosion(0.7 + (stageIdx * 0.1), true);
 
-    const sampleSize = Math.min(16, Math.floor(sourceParticles.length * 0.35));
-    for (let i = 0; i < sampleSize; i++) {
+    const sampleCount = Math.min(16, Math.max(4, Math.floor(sourceParticles.length * 0.3)));
+    for (let i = 0; i < sampleCount; i++) {
       const src = sourceParticles[Math.floor(Math.random() * sourceParticles.length)];
       if (!src || src.isDead) continue;
 
       const subCount = 6;
-      const subPalette = COLOR_PALETTES.monochrome;
-
       for (let j = 0; j < subCount; j++) {
         const angle = (j / subCount) * Math.PI * 2;
-        const speed = 1.2 + Math.random() * 1.2;
-        const color = subPalette[Math.floor(Math.random() * subPalette.length)];
+        const speed = 1.0 + Math.random() * 1.4;
+        const color = ColorPaletteEngine.resolveStageColor(stageIdx, this.waveConfig);
 
         this.particles.push(new AsciiParticle({
           x: src.x,
@@ -163,8 +161,8 @@ export class FireworkRocket {
           vx: Math.cos(angle) * speed + src.vx * 0.2,
           vy: Math.sin(angle) * speed + src.vy * 0.2,
           color: color,
-          char: Math.random() > 0.5 ? '.' : ':',
-          charPool: ['.', ':', '*', '0'],
+          char: Math.random() > 0.5 ? '.' : (stageIdx >= 2 ? '✦' : ':'),
+          charPool: ['.', ':', '*', '✦', '0'],
           hangTime: this.hangTime * 0.8,
           isSecondary: true,
           size: 10
@@ -184,12 +182,7 @@ export class FireworkRocket {
       ctx.restore();
     }
 
-    for (const tp of this.trailParticles) {
-      tp.draw(ctx);
-    }
-
-    for (const p of this.particles) {
-      p.draw(ctx);
-    }
+    for (const tp of this.trailParticles) tp.draw(ctx);
+    for (const p of this.particles) p.draw(ctx);
   }
 }
