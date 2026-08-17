@@ -1,0 +1,154 @@
+/* ==========================================================================
+   MINIMALIST TERMINAL & MONOCHROME DESIGN SYSTEM
+   Clean, Understated, Professional Dark Terminal Aesthetics
+   ========================================================================== */
+
+:root {
+  /* Default Minimalist Monochrome Palette */
+  --bg-color: #0c0d11;
+  --bg-surface: #13151b;
+  --bg-card: #181a22;
+  --bg-overlay: rgba(12, 13, 17, 0.88);
+  
+  --text-primary: #ededed;
+  --text-secondary: #a1a1aa;
+  --text-dim: #71717a;
+  --text-muted: #52525b;
+  --text-accent: #f4f4f5;
+  
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-medium: rgba(255, 255, 255, 0.15);
+  --border-focus: rgba(255, 255, 255, 0.35);
+  
+  --danger: #ef4444;
+  --danger-bg: rgba(239, 68, 68, 0.12);
+  --accent-glow: rgba(255, 255, 255, 0.05);
+
+  /* Fonts */
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'SF Mono', Menlo, Consolas, monospace;
+  
+  /* Radii & Shadows */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --shadow-dropdown: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--border-subtle);
+  
+  /* UI Metrics */
+  --header-height: 48px;
+  --cli-height: 44px;
+}
+
+/* Theme: Slate / Nordic Dark (Muted Cool Gray) */
+body[data-theme="slate"] {
+  --bg-color: #0f1117;
+  --bg-surface: #161922;
+  --bg-card: #1d212c;
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-dim: #64748b;
+  --border-subtle: rgba(226, 232, 240, 0.08);
+  --border-medium: rgba(226, 232, 240, 0.16);
+}
+
+/* Theme: Warm Charcoal / Paper Dark */
+body[data-theme="warm"] {
+  --bg-color: #121110;
+  --bg-surface: #1a1816;
+  --bg-card: #22201d;
+  --text-primary: #f5f0eb;
+  --text-secondary: #b8b0a5;
+  --text-dim: #80776c;
+  --border-subtle: rgba(245, 240, 235, 0.08);
+  --border-medium: rgba(245, 240, 235, 0.16);
+}
+
+/* Base Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.5;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Main Container */
+.terminal-wrap {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg-color);
+}
+
+/* Very subtle vignette for depth without obnoxious CRT noise */
+.screen-vignette {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 20;
+  background: radial-gradient(circle at 50% 50%, transparent 65%, rgba(0, 0, 0, 0.45) 100%);
+}
+
+/* Subtle micro scanlines (minimal & calm) */
+.subtle-scanline {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 21;
+  background: linear-gradient(
+    rgba(255, 255, 255, 0) 50%, 
+    rgba(0, 0, 0, 0.15) 50%
+  );
+  background-size: 100% 4px;
+  opacity: 0.25;
+}
+
+/* Main Fireworks Canvas Layer */
+#fireworksCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  cursor: crosshair;
+}
+
+/* Custom Scrollbar - Minimal Dark */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
