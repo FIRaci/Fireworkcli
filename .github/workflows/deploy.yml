@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  deploy-pages:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -33,6 +33,14 @@ jobs:
         with:
           path: '.'
 
-      - name: Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages (Actions)
         id: deployment
         uses: actions/deploy-pages@v4
+        continue-on-error: true
+
+      - name: Deploy to gh-pages branch (Fallback)
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .
+          publish_branch: gh-pages
