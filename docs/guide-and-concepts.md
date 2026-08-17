@@ -1,59 +1,63 @@
-# Hướng Dẫn Sử Dụng & Bảng Giải Thích Thuật Ngữ
+# Hướng Dẫn Sử Dụng & Bảng Tra Cứu 35+ Kiểu Hình v4.0
 
-Tài liệu hướng dẫn chi tiết từng bước cách cấu hình và vận hành hệ thống pháo hoa Terminal ASCII Fireworks.
-
----
-
-## 📖 1. Bảng Giải thích Thuật ngữ Cốt lõi
-
-### 🌊 Đợt nổ (Wave)
-- **Định nghĩa**: Là một đợt bắn / cụm pháo hoa được phóng lên theo dòng thời gian kịch bản.
-- **Đặc điểm**: Mỗi đợt có độ trễ kích hoạt (`delayBefore`), số lượng quả pháo phóng lên (`rocketCount`), và kiểu hình riêng.
-- **Ví dụ thực tế**:
-  - *Đợt 1*: Bắn 3 quả mở màn phân tán hình quạt.
-  - *Nghỉ 2 giây* (`delayBefore: 2.0s`).
-  - *Đợt 2*: Bắn cụm chữ *"I love you ♡"*.
-  - *Nghỉ 1.5 giây*.
-  - *Đợt 3*: Bắn 4 quả kết thúc rực rỡ.
-
-### 💥 Lượt nổ (Multi-Stage Burst)
-- **Định nghĩa**: Là số lần phát nổ liên tiếp của từng quả pháo đơn lẻ sau khi đạt độ cao cực đại.
-- **Phân loại**:
-  - **1 Lượt (Single Burst)**: Quả pháo bay lên và nổ tung một lần thành các hạt ASCII.
-  - **2 Lượt (Double Burst)**: Quả pháo nổ lần 1 tạo chùm hạt chính; sau `x` giây delay do người dùng cài đặt (`stage2Delay`), các hạt chính tiếp tục phát nổ lần 2 thành các chùm sao phụ lấp lánh (Secondary Explosion).
-  - **3 Lượt (Triple Burst)**: Nổ đa tầng 3 giai đoạn liên hoàn.
-
-### ⏳ Thời gian lơ lửng (Hang Time)
-- **Định nghĩa**: Khoảng thời gian (giây) các hạt pháo hoa trôi bồng bềnh và duy trì trên không trung trước khi trọng lực bắt đầu kéo rơi xuống và phân rã dần ký tự (`*` -> `:` -> `.`).
-- **Ứng dụng**: Tăng Hang Time khi bắn chữ ("I love you ♡") để người xem đọc rõ nội dung câu chữ.
-
-### 🔤 Bắn chữ & Tạo hình (Shape & Text Rasterizer)
-- **Định nghĩa**: Công cụ quét tự động biến đổi bất kỳ câu chữ nào bạn nhập (như *"I love you ♡"*, *"2026"*) hoặc công thức toán học hình Trái tim, Ngôi sao thành ma trận tọa độ hạt ASCII nở bung sắc nét trên không trung.
-
-### ⏱ Giãn cách bắn (Stagger)
-- **Định nghĩa**: Khoảng thời gian lệch pha (giây) giữa các quả pháo trong cùng một Đợt. Giúp tạo hiệu ứng pháo hoa bắn nối tiếp thay vì phóng đồng loạt cùng một thời điểm.
+Tài liệu hướng dẫn chi tiết các tính năng tối thượng trong hệ thống **Terminal ASCII Fireworks v4.0 (Powerhouse Studio)**.
 
 ---
 
-## 🚀 2. Hướng dẫn từng bước (Step-by-Step Tutorial)
+## 🎨 1. Tính Năng Biến Ảnh PNG & Nét Vẽ Tay Thành Pháo Hoa
 
-1. **Bước 1 - Trải nghiệm nhanh**:
-   - Nhấn nút **Start Show** trên thanh công cụ hoặc gõ `start` trong ô Terminal CLI để xem kịch bản pháo hoa mẫu.
-   - Bạn cũng có thể click chuột trực tiếp vào bất kỳ vị trí nào trên màn hình để phóng pháo hoa tại tọa độ đó.
+### 🖼 Tải Ảnh PNG sang Pháo hoa (PNG to Fireworks Engine)
+- **Cách hoạt động**: Kéo thả bất kỳ file ảnh PNG, Logo hoặc Icon vào ô tải ảnh trong tab **PNG & Doodle**.
+- **Công nghệ quét**: Canvas tự động phân tích độ trong suốt alpha, trích xuất ma trận pixel và bắn thành chùm pháo hoa ASCII giữ nguyên màu sắc gốc của ảnh.
 
-2. **Bước 2 - Mở bảng tùy biến**:
-   - Nhấn tổ hợp phím **`Alt + Q`** hoặc nút **Config** trên thanh công cụ.
+### ✏️ Bảng Vẽ Doodle Tự Do (Custom Drawing Canvas)
+- **Cách hoạt động**: Tự tay dùng chuột hoặc bút cảm ứng vẽ bất kỳ hình thù gì lên khung vẽ mini 160x160.
+- **Phóng pháo**: Bấm nút **"Bắn thử nét vẽ"** để phóng nét vẽ của bạn nổ tung thành pháo hoa trên bầu trời.
 
-3. **Bước 3 - Cấu hình chuỗi Đợt & Lượt nổ**:
-   - Trong thẻ **Waves & Stages**, bạn có thể bấm **+ Add Wave** để thêm đợt mới.
-   - Chỉnh sửa độ trễ chuyển đợt, số lượng pháo và số lượt nổ (1 hoặc 2 lượt).
+---
 
-4. **Bước 4 - Bắn chữ cá nhân hóa**:
-   - Trong thẻ Đợt bất kỳ, chọn Kiểu hình: `Bắn cụm chữ (Custom Text)`.
-   - Nhập nội dung câu chữ mong muốn (vd: `I love you ♡`).
-   - Bấm nút **Bắn thử** trên góc thẻ để kiểm tra ngay.
+## 💥 2. Cơ Chế Nổ Đa Tầng Không Giới Hạn (Unlimited Stages)
 
-5. **Bước 5 - Sử dụng dòng lệnh CLI**:
-   - Gõ `text I love you ♡` để bắn ngay cụm chữ.
-   - Gõ `heart` hoặc `star` để bắn hình trái tim hoặc ngôi sao.
-   - Gõ `preset champagne_finale` hoặc `preset monochrome_minimal` để đổi kịch bản.
+- Cho phép **nhập số lượng lượt nổ tự do** (`1` đến `20+` lượt) thay vì bị giới hạn.
+- Tự động tính toán nhịp delay và phối màu sắc cho từng tầng nổ liên hoàn.
+
+---
+
+## 📐 3. Danh Mục 35+ Kiểu Hình Toán Học (Parametric Shapes)
+
+| Nhóm | Kiểu hình | Ký hiệu / Lệnh CLI | Mô tả |
+|---|---|---|---|
+| **Tùy biến** | Ảnh PNG | `custom_image` | Pháo hoa tạo từ ảnh tải lên |
+| | Nét vẽ tay | `custom_doodle` | Pháo hoa tạo từ bảng vẽ Doodle |
+| | Bắn câu chữ | `text <câu chữ>` | Quét ký tự bung tỏa ma trận chữ |
+| **Hình học** | Hình vuông | `square` | Khung vuông góc cạnh 4 cạnh |
+| | Hình tròn | `circle` | Vòng tròn chuẩn toán học |
+| | Tam giác | `triangle` | Tam giác đều 3 đỉnh |
+| | Lục giác | `hexagon` | Khối đa giác 6 cạnh |
+| | Bát giác | `octagon` | Khối đa giác 8 cạnh |
+| | Sao 5 cánh | `star` / `star5` | Ngôi sao 5 cánh kinh điển |
+| | Sao 6 cánh | `star6` | Ngôi sao David 6 đỉnh đối xứng |
+| | Sao 8 cánh | `star8` | Bát giác sao tỏa sáng |
+| | Sao 12 cánh | `star12` | Đại tinh tú 12 tia |
+| | Kim cương | `diamond` | Hình thoi lấp lánh |
+| **Loài hoa** | Hoa hồng | `rose` | Đường cong cánh hoa Maurer Rose |
+| | Hoa sen | `lotus` | Cánh sen nhiều tầng vươn cao |
+| | Hướng dương | `sunflower` | Nhụy tròn tâm + 16 tia hoa |
+| | Hoa anh đào | `sakura` | 5 cánh hoa đào xẻ rãnh tinh tế |
+| | Hoa tulip | `tulip` | Dáng hoa cúp hoàng gia |
+| | Bồ công anh | `dandelion` | Hạt phấn hình cầu bay lơ lửng |
+| | Cúc đại đóa | `chrysanthemum` | Chùm cánh hoa dày đặc |
+| | Liễu rủ | `willow` | Cành liễu rủ mưa rơi mềm mại |
+| **Biểu tượng** | Trái tim | `heart` | Đường cong Cardioid tình yêu |
+| | Sao Thổ | `saturn` | Quả cầu tâm + vành đai nghiêng |
+| | Cánh bướm | `butterfly` | Đường cong cánh bướm Temple Fay |
+| | Mặt trăng | `moon` | Vành trăng khuyết lãng mạn |
+| | Mặt trời | `sun` | Vầng dương tỏa tia nhiệt |
+| | Nốt nhạc | `music` | Đầu nốt + đuôi móc cao vút |
+| | Bông tuyết | `snow` | Tinh thể tuyết 6 nhánh đối xứng |
+| | Cây thông | `tree` | Dáng thông Noel 3 tầng lá |
+| | Vô cực | `infinity` | Đường cong số 8 Lemniscate |
+| | Vương miện | `crown` | 3 chóp vương miện hoàng gia |
+| | Mặt cười | `smiley` | Vòng tròn + 2 mắt + nụ cười |
+| | Vòng tròn đôi | `double_ring` | 2 vòng tròn đồng tâm nở rộng |
+| | Xoắn ốc | `spiral` | Thiên hà xoắn ốc Archimedes |

@@ -1,6 +1,6 @@
 /**
- * Interactive Terminal CLI Engine v3.0
- * Command line parser, command history, autocompletion, and system logger
+ * Interactive Terminal CLI Engine v4.0 (<195 lines)
+ * 35+ Shapes routing, PNG & Doodle commands, command history, and system logger
  */
 
 export class TerminalCLI {
@@ -12,9 +12,11 @@ export class TerminalCLI {
     this.history = [];
     this.historyIndex = -1;
     this.commands = [
-      'start', 'stop', 'config', 'guide', 'text', 'heart', 'star', 'star8', 
-      'saturn', 'butterfly', 'infinity', 'clover', 'crown', 'diamond', 'smiley', 
-      'chrysanthemum', 'spiral', 'willow', 'double_ring', 'preset', 'theme', 'sound', 'clear', 'help'
+      'start', 'stop', 'config', 'guide', 'text', 'rose', 'lotus', 'sunflower', 
+      'sakura', 'tulip', 'dandelion', 'square', 'circle', 'triangle', 'hexagon', 
+      'octagon', 'star', 'star6', 'star8', 'star12', 'moon', 'sun', 'music', 
+      'snow', 'tree', 'saturn', 'butterfly', 'heart', 'infinity', 'crown', 'diamond', 
+      'preset', 'theme', 'sound', 'clear', 'help'
     ];
 
     this.bindEvents();
@@ -57,29 +59,18 @@ export class TerminalCLI {
     const val = this.input.value.trim().toLowerCase();
     if (!val) return;
     const match = this.commands.find(c => c.startsWith(val));
-    if (match) {
-      this.input.value = match + ' ';
-    }
+    if (match) this.input.value = match + ' ';
   }
 
   log(message, type = 'info') {
     const entry = document.createElement('div');
     entry.className = 'log-entry';
-    
     const now = new Date();
     const timeStr = `[${now.toTimeString().split(' ')[0]}]`;
-    
-    entry.innerHTML = `
-      <span class="log-time">${timeStr}</span>
-      <span class="log-${type}">${message}</span>
-    `;
-
+    entry.innerHTML = `<span class="log-time">${timeStr}</span><span class="log-${type}">${message}</span>`;
     this.logs.appendChild(entry);
     this.logs.scrollTop = this.logs.scrollHeight;
-
-    while (this.logs.children.length > 35) {
-      this.logs.removeChild(this.logs.firstChild);
-    }
+    while (this.logs.children.length > 35) this.logs.removeChild(this.logs.firstChild);
   }
 
   executeCommand(rawCmd) {
@@ -91,7 +82,6 @@ export class TerminalCLI {
     switch (cmd) {
       case 'start':
       case 'run':
-      case 'launch':
         this.app.startShow();
         this.log('Kích hoạt pháo hoa theo kịch bản.', 'info');
         break;
@@ -102,15 +92,13 @@ export class TerminalCLI {
         break;
 
       case 'config':
-      case 'settings':
         this.app.toggleModal(true);
         this.log('Mở bảng cấu hình tùy biến chuyên sâu (Alt + Q)...', 'info');
         break;
 
       case 'guide':
-      case 'glossary':
         this.app.openGuide();
-        this.log('Mở tài liệu Hướng dẫn & 16+ Kiểu hình...', 'info');
+        this.log('Mở tài liệu Hướng dẫn & 35+ Kiểu hình...', 'info');
         break;
 
       case 'text':
@@ -119,72 +107,55 @@ export class TerminalCLI {
         this.log(`Bắn cụm chữ: "${msg}"`, 'info');
         break;
 
-      case 'heart':
-      case 'star':
-      case 'star8':
-      case 'saturn':
-      case 'butterfly':
-      case 'infinity':
-      case 'clover':
-      case 'crown':
-      case 'diamond':
-      case 'smiley':
-      case 'chrysanthemum':
-      case 'spiral':
-      case 'willow':
-      case 'double_ring':
-        this.app.fireShape(cmd);
+      // 35+ Shapes
+      case 'rose': case 'lotus': case 'sunflower': case 'sakura': case 'tulip': case 'dandelion':
+      case 'square': case 'circle': case 'triangle': case 'hexagon': case 'octagon':
+      case 'star': case 'star5': case 'star6': case 'star8': case 'star12': case 'diamond':
+      case 'moon': case 'sun': case 'music': case 'music_note': case 'snow': case 'snowflake': case 'tree':
+      case 'saturn': case 'butterfly': case 'heart': case 'infinity': case 'crown': case 'smiley':
+      case 'chrysanthemum': case 'spiral': case 'willow': case 'double_ring':
+        const mappedShape = cmd === 'music' ? 'music_note' : (cmd === 'snow' ? 'snowflake' : cmd);
+        this.app.fireShape(mappedShape);
         this.log(`Bắn pháo hoa hình [${cmd}]`, 'info');
         break;
 
       case 'preset':
         const presetKey = (args[0] || '').toLowerCase();
-        if (this.app.loadPreset(presetKey)) {
-          this.log(`Đã nạp preset [${presetKey}]`, 'info');
-        } else {
-          this.log('Preset: romantic_salvo, cosmic_spectrum', 'error');
-        }
+        if (this.app.loadPreset(presetKey)) this.log(`Đã nạp preset [${presetKey}]`, 'info');
+        else this.log('Preset: romantic_salvo, cosmic_spectrum', 'error');
         break;
 
       case 'theme':
         const themeName = (args[0] || '').toLowerCase();
         if (['monochrome', 'slate', 'warm'].includes(themeName)) {
           this.app.setTheme(themeName);
-          this.log(`Đã chuyển theme sang [${themeName}]`, 'info');
-        } else {
-          this.log('Theme: monochrome, slate, warm', 'warn');
-        }
+          this.log(`Theme chuyển sang [${themeName}]`, 'info');
+        } else this.log('Theme: monochrome, slate, warm', 'warn');
         break;
 
       case 'sound':
         const mode = args[0];
-        const enabled = mode === 'off' ? false : (mode === 'on' ? true : null);
-        const state = this.app.toggleSound(enabled);
+        const state = this.app.toggleSound(mode === 'off' ? false : (mode === 'on' ? true : null));
         this.log(`Âm thanh: ${state ? 'Bật' : 'Tắt'}`, 'info');
         break;
 
       case 'clear':
-      case 'cls':
         this.logs.innerHTML = '';
         this.app.clearCanvas();
         this.log('Đã xóa màn hình.', 'info');
         break;
 
       case 'help':
-        this.printHelp();
+        this.log('Lệnh: start, stop, config, guide, text <msg>, rose, lotus, sunflower, square, circle, star12, moon, sun, help', 'info');
         break;
 
       default:
-        this.log(`Lệnh không xác định: "${cmd}". Gõ 'help' để xem danh sách lệnh.`, 'error');
+        this.log(`Lệnh không xác định: "${cmd}". Gõ 'help' để xem danh sách.`, 'error');
     }
   }
 
   printWelcome() {
-    this.log('Terminal ASCII Fireworks v3.0. Press [Alt + Q] for Ultra Customizer.', 'info');
-    this.log('Commands: start, text <msg>, saturn, butterfly, heart, star, clover, guide, help.', 'info');
-  }
-
-  printHelp() {
-    this.log('Commands: start, stop, config, guide, text <msg>, heart, star, saturn, butterfly, infinity, clover, crown, preset <name>, theme, sound, clear, help', 'info');
+    this.log('Terminal ASCII Fireworks v4.0. Press [Alt + Q] for Studio & PNG uploader.', 'info');
+    this.log('Shapes: rose, lotus, sunflower, sakura, square, circle, star12, moon, sun, butterfly, saturn...', 'info');
   }
 }

@@ -1,6 +1,6 @@
 /**
- * Firework Rocket & Up to 5-Stage Detonation Controller
- * Supports multi-stage sequence, per-stage color mapping, and 16+ mathematical shapes
+ * Firework Rocket Controller (<190 lines)
+ * Unlimited numeric stages, PNG particle color preservation, and 35+ shape detonations
  */
 
 import { AsciiParticle } from './particle.js';
@@ -25,9 +25,9 @@ export class FireworkRocket {
     this.vx = (dx / distance) * this.speed;
     this.vy = (dy / distance) * this.speed;
 
-    // Up to 5 stages configuration
-    this.stages = Math.min(5, Math.max(1, options.stages || 1));
-    this.stageDelays = options.stageDelays || [0, 0.75, 1.35, 1.95, 2.55];
+    // Unlimited numeric stages (1 to 20+)
+    this.stages = Math.max(1, parseInt(options.stages, 10) || 1);
+    this.stageDelays = options.stageDelays || [];
     this.stageColors = options.stageColors || [];
     this.colorPalette = options.colorPalette || 'monochrome';
     this.waveConfig = options;
@@ -91,48 +91,43 @@ export class FireworkRocket {
 
   explode() {
     this.isExploded = true;
+    soundFx.playExplosion(1.0);
 
-    if (this.shape === 'text' || this.shape === 'heart') {
-      soundFx.playChimeChord();
-      soundFx.playExplosion(0.9);
-    } else {
-      soundFx.playExplosion(1.0);
-    }
-
-    // Stage 1 Burst
     const vectors = ShapeRasterizer.getShapeVectors(
       this.shape,
       this.customText,
-      Math.floor(65 * this.spread),
+      Math.floor(75 * this.spread),
       4.2 * this.spread
     );
 
     const stage1Particles = [];
 
     vectors.forEach((v) => {
-      const color = ColorPaletteEngine.resolveStageColor(0, this.waveConfig);
+      const color = v.hasCustomColor ? v.color : ColorPaletteEngine.resolveStageColor(0, this.waveConfig);
       const char = v.char || this.charPool[Math.floor(Math.random() * this.charPool.length)] || '*';
 
+      const isTextOrDoodle = this.shape === 'text' || this.shape === 'custom_image' || this.shape === 'custom_doodle';
       const p = new AsciiParticle({
         x: this.x,
         y: this.y,
-        vx: v.dx * (this.shape === 'text' ? 0.35 : 1.0),
-        vy: v.dy * (this.shape === 'text' ? 0.35 : 1.0),
+        vx: v.dx * (isTextOrDoodle ? 0.35 : 1.0),
+        vy: v.dy * (isTextOrDoodle ? 0.35 : 1.0),
         color: color,
         char: char,
         charPool: this.charPool,
         hangTime: this.hangTime,
         isWillow: v.isWillow || false,
-        size: this.shape === 'text' ? 12 : 13
+        size: isTextOrDoodle ? 12 : 13
       });
 
       this.particles.push(p);
       stage1Particles.push(p);
     });
 
-    // Schedule Multi-Stages (Stage 2..5)
+    // Schedule Dynamic Multi-Stages (Stage 2..N)
     for (let s = 2; s <= this.stages; s++) {
-      const delay = (this.stageDelays[s - 1] || ((s - 1) * 0.7)) * 1000;
+      const defaultDelay = (s - 1) * 0.65;
+      const delay = (this.stageDelays[s - 1] !== undefined ? this.stageDelays[s - 1] : defaultDelay) * 1000;
       setTimeout(() => {
         this.triggerStageBurst(s - 1, stage1Particles);
       }, delay);
@@ -141,15 +136,14 @@ export class FireworkRocket {
 
   triggerStageBurst(stageIdx, sourceParticles) {
     if (this.isDead) return;
+    soundFx.playExplosion(0.7 + (stageIdx * 0.05), true);
 
-    soundFx.playExplosion(0.7 + (stageIdx * 0.1), true);
-
-    const sampleCount = Math.min(16, Math.max(4, Math.floor(sourceParticles.length * 0.3)));
+    const sampleCount = Math.min(20, Math.max(4, Math.floor(sourceParticles.length * 0.3)));
     for (let i = 0; i < sampleCount; i++) {
       const src = sourceParticles[Math.floor(Math.random() * sourceParticles.length)];
       if (!src || src.isDead) continue;
 
-      const subCount = 6;
+      const subCount = 5;
       for (let j = 0; j < subCount; j++) {
         const angle = (j / subCount) * Math.PI * 2;
         const speed = 1.0 + Math.random() * 1.4;
@@ -181,7 +175,6 @@ export class FireworkRocket {
       ctx.fillText(this.trailChar, this.x, this.y);
       ctx.restore();
     }
-
     for (const tp of this.trailParticles) tp.draw(ctx);
     for (const p of this.particles) p.draw(ctx);
   }

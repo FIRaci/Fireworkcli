@@ -1,5 +1,5 @@
 /**
- * Alt + Q Modal Controller v3.0 (<160 lines)
+ * Alt + Q Modal Controller v4.0 (<165 lines)
  */
 
 import { configStore } from './config.js';
@@ -7,6 +7,7 @@ import { ModalCardTemplate } from './modal-card-template.js';
 import { StorageManager } from './storage-manager.js';
 import { ModalTabRenderer } from './modal-tab-renderer.js';
 import { ModalSyncHelper } from './modal-sync-helper.js';
+import { ModalDoodleHelper } from './modal-doodle-helper.js';
 
 export class ModalController {
   constructor(modalElement, appController) {
@@ -27,6 +28,7 @@ export class ModalController {
     this.guideContainer = this.modal.querySelector('#guideContainer');
     this.clickContainer = this.modal.querySelector('#clickContainer');
     this.displayContainer = this.modal.querySelector('#displayContainer');
+    this.pngContainer = this.modal.querySelector('#pngContainer');
 
     this.closeBtn = this.modal.querySelector('#modalCloseBtn');
     this.addWaveBtn = this.modal.querySelector('#addWaveBtn');
@@ -40,6 +42,7 @@ export class ModalController {
 
   renderAllTabs() {
     this.renderWaves();
+    ModalTabRenderer.renderPngDoodleTab(this.pngContainer, this.app);
     ModalTabRenderer.renderPresets(this.presetsContainer, this.app, (preset) => {
       this.renderWaves();
       this.app.setTheme(preset.theme || 'monochrome');
@@ -48,17 +51,21 @@ export class ModalController {
     ModalTabRenderer.renderGuide(this.guideContainer);
     ModalTabRenderer.renderClickSettings(this.clickContainer);
     ModalTabRenderer.renderDisplaySettings(this.displayContainer, this.app);
+    ModalDoodleHelper.init(this.modal, this.app, this);
+  }
+
+  triggerLivePreview(action) {
+    this.modal.classList.add('preview-transparent');
+    if (action) action();
+    setTimeout(() => {
+      this.modal.classList.remove('preview-transparent');
+    }, 3200);
   }
 
   bindEvents() {
-    this.tabBtns.forEach(btn => {
-      btn.addEventListener('click', () => this.switchTab(btn.dataset.tab));
-    });
-
+    this.tabBtns.forEach(btn => btn.addEventListener('click', () => this.switchTab(btn.dataset.tab)));
     this.closeBtn.addEventListener('click', () => this.toggle(false));
-    this.modal.addEventListener('click', (e) => {
-      if (e.target === this.modal) this.toggle(false);
-    });
+    this.modal.addEventListener('click', (e) => { if (e.target === this.modal) this.toggle(false); });
 
     this.addWaveBtn.addEventListener('click', () => {
       configStore.addWave();
@@ -67,7 +74,7 @@ export class ModalController {
 
     this.testFireBtn.addEventListener('click', () => {
       ModalSyncHelper.syncAll(this.modal, this.app);
-      this.app.startShow();
+      this.triggerLivePreview(() => this.app.startShow());
     });
 
     this.applyBtn.addEventListener('click', () => {
@@ -86,12 +93,9 @@ export class ModalController {
 
     if (this.importBtn) {
       this.importBtn.addEventListener('click', () => {
-        if (this.jsonInput && this.jsonInput.value) {
-          if (configStore.importJSON(this.jsonInput.value)) {
-            this.renderWaves();
-            ModalTabRenderer.renderClickSettings(this.clickContainer);
-            this.app.terminal.log('Đã nạp JSON thành công.', 'info');
-          }
+        if (this.jsonInput && this.jsonInput.value && configStore.importJSON(this.jsonInput.value)) {
+          this.renderWaves();
+          this.app.terminal.log('Đã nạp JSON thành công.', 'info');
         }
       });
     }
@@ -101,7 +105,6 @@ export class ModalController {
         StorageManager.clearStorage();
         configStore.loadPreset('romantic_salvo');
         this.renderWaves();
-        ModalTabRenderer.renderClickSettings(this.clickContainer);
         this.app.terminal.log('Đã khôi phục cài đặt gốc.', 'info');
       });
     }
@@ -117,7 +120,6 @@ export class ModalController {
     if (this.isOpen) {
       this.modal.classList.add('open');
       this.renderWaves();
-      ModalTabRenderer.renderClickSettings(this.clickContainer);
       if (this.jsonInput) this.jsonInput.value = configStore.exportJSON();
       if (initialTab) this.switchTab(initialTab);
     } else {
@@ -143,18 +145,16 @@ export class ModalController {
   bindWaveActions() {
     this.wavesContainer.querySelectorAll('.delete-wave-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        const idx = parseInt(btn.dataset.idx, 10);
-        configStore.removeWave(idx);
+        configStore.removeWave(parseInt(btn.dataset.idx, 10));
         this.renderWaves();
       });
     });
 
     this.wavesContainer.querySelectorAll('.test-wave-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        const idx = parseInt(btn.dataset.idx, 10);
         ModalSyncHelper.syncAll(this.modal, this.app);
-        const wave = configStore.activeShow.waves[idx];
-        if (wave) this.app.engine.scheduler.executeWave(wave);
+        const wave = configStore.activeShow.waves[parseInt(btn.dataset.idx, 10)];
+        if (wave) this.triggerLivePreview(() => this.app.engine.scheduler.executeWave(wave));
       });
     });
 
